@@ -14,6 +14,7 @@ const SERVER = {
       "http://localhost:3000",
       "http://localhost:5000",
       "http://localhost:5173",
+      "https://shortyou.vercel.app"
     ],
     RATE_LIMITS: {
       windowMs: 10 * 60 * 1000, // 10 minutes
