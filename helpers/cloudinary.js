@@ -14,35 +14,48 @@ function uploadVideo(videoBuffer) {
   });
 }
 
-async function uploadThumbail(thumbail) {
-  const res = await cloudinary.uploader.upload(thumbail, {
-    folder: "hackatoon_cloudinary/thumbails",
-    resource_type: "image",
-    quality: 1,
+async function uploadThumbail(thumbailBuffer) {
+  return new Promise((resolve, reject) => {
+    const streamUpload = cloudinary.uploader.upload_stream(
+      {
+        folder: "hackatoon_cloudinary/thumbails",
+        quality: 1,
+        resource_type: "image",
+      },
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
+    streamifier.createReadStream(thumbailBuffer).pipe(streamUpload);
   });
-  return res;
 }
 
-async function uploadOriginal(original) {
-  const res = await cloudinary.uploader.upload(original, {
-    folder: "hackatoon_cloudinary/originals",
-    resource_type: "image",
+async function uploadOriginal(originalBuffer) {
+  return new Promise((resolve, reject) => {
+    const streamUpload = cloudinary.uploader.upload_stream(
+      { folder: "hackatoon_cloudinary/originals", resource_type: "image" },
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
+    streamifier.createReadStream(originalBuffer).pipe(streamUpload);
   });
-  return res;
 }
 
-async function uploadPreviewPicture(preview) {
+async function uploadPreviewPicture(previewBuffer) {
   const [p1, p2] = await Promise.allSettled([
-    uploadThumbail(preview),
-    uploadOriginal(preview),
+    uploadThumbail(previewBuffer),
+    uploadOriginal(previewBuffer),
   ]);
   return { thumbail: p1.value, original: p2.value };
 }
 
-async function uploadPostToCloudinary(videoBuffer, previewPicture) {
+async function uploadPostToCloudinary(videoBuffer, previewPictureBuffer) {
   const [video, previewPictures] = await Promise.allSettled([
     uploadVideo(videoBuffer),
-    uploadPreviewPicture(previewPicture),
+    uploadPreviewPicture(previewPictureBuffer),
   ]);
   const { thumbail, original } = previewPictures.value;
 

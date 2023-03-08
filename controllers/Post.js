@@ -50,6 +50,12 @@ class PostController {
         });
       }
 
+      if (!req.files.original) {
+        return error(res, {
+          message: "Preview video not selected",
+        });
+      }
+      
       if (isNotValidFileType(mimetype)) {
         return error(res, {
           message: "Video type is invalid o not allowed, check the mime-type",
@@ -67,8 +73,9 @@ class PostController {
 
       const { video, thumbail, original } = await uploadPostToCloudinary(
         videoBuffer,
-        body.original
+        req.files.original.data // the preview video buffer
       );
+
       const {
         asset_id,
         public_id,
